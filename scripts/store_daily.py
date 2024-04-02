@@ -49,19 +49,15 @@ class Pocketbase:
             print("Response:", response.text)
 
 
-class Config(BaseModel):
-    base_url: str = "http://127.0.0.1:8090"
-    identity: str
-    password: str
+class PocketbaseConfig(BaseModel):
+    base_url: str = os.environ.get("POCKETBASE_URL", "http://127.0.0.1:8090"),
+    identity: str = os.environ.get("POCKETBASE_ADMIN_IDENTITY"),
+    password: str = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
 
 
 if __name__ == "__main__":
     # Load configuration from environment variables
-    config = Config(
-        base_url=os.environ.get("POCKETBASE_URL"),
-        identity=os.environ.get("POCKETBASE_ADMIN_IDENTITY"),
-        password=os.environ.get("POCKETBASE_ADMIN_PASSWORD"),
-    )
+    config = PocketbaseConfig()
 
     # Initialize Pocketbase instance with configuration
     pocketbase = Pocketbase(
