@@ -49,15 +49,30 @@ class Pocketbase:
             print("Response:", response.text)
 
 
-class PocketbaseConfig(BaseModel):
-    base_url: str = os.environ.get("POCKETBASE_URL", "http://127.0.0.1:8090"),
-    identity: str = os.environ.get("POCKETBASE_ADMIN_IDENTITY"),
-    password: str = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
+class PocketbaseConfig:
+    def __init__(self) -> None:
+        self.base_url: str = os.getenv("POCKETBASE_URL"),
+        self.identity: str = os.getenv("POCKETBASE_ADMIN_IDENTITY"),
+        self.password: str = os.getenv("POCKETBASE_ADMIN_PASSWORD")
+
+        print(vars(self))
+    
+    def __setattr__(self, name, value):
+        if isinstance(value, tuple):
+            # If value is a tuple, extract the inner string
+            value = value[0]  # Assuming the tuple contains only one element
+        super().__setattr__(name, value)
+    
+    
+    
 
 
 if __name__ == "__main__":
     # Load configuration from environment variables
     config = PocketbaseConfig()
+    print(config.base_url)
+    print(config.identity)
+    print(config.password)
 
     # Initialize Pocketbase instance with configuration
     pocketbase = Pocketbase(
@@ -79,6 +94,8 @@ if __name__ == "__main__":
         "LTC/USDT",
         "SOL/USDT"
     ]
+
+
     symbol = "BTC/USD"
     resp = requests.get(
         f'https://api.kraken.com/0/public/OHLC?pair={symbol}&interval={interval}&since={since}'
@@ -90,7 +107,7 @@ if __name__ == "__main__":
         result = []
 
     # Insert fetched data into Pocketbase
-    path = "/api/collections/candles_btc/records"
+    path = "/api/collections/btc_ohlc/records"
     for r in result:
         data = {
             "time": int(r[0]),
